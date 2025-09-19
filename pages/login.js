@@ -43,7 +43,7 @@ export default function Login() {
 
 return (
     <>
-             <Layout title="Kuisi Publik | halaman login" description="Buat dan jawab quiz publik dengan user lain" loading={loading}>
+             <Layout title="Kuisi Publik | halaman login" description="Buat dan jawab quiz publik dengan user lain"  >
 
       <div className="container mt-5">
         <h2>Login</h2>
