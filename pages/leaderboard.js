@@ -31,6 +31,7 @@ export default function Leaderboard() {
         {users.length === 0 ? (
           <p>Belum ada user yang menyelesaikan quiz.</p>
         ) : (
+                <div className="table-responsive">
           <table className="table table-striped table-bordered mt-3">
             <thead className="table-dark">
               <tr>
@@ -51,6 +52,7 @@ export default function Leaderboard() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
       </Layout>
