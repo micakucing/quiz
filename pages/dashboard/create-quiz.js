@@ -1,40 +1,31 @@
 import { useState } from "react";
+import { useRouter } from "next/router";
 import { collection, addDoc } from "firebase/firestore";
 import { db, auth } from "../../lib/firebase";
 import Navbar from "../../components/Navbar";
-import { useRouter } from "next/router";
 
 export default function CreateQuiz() {
-  const [title, setTitle] = useState("");
-  const [questions, setQuestions] = useState([{ question: "", options: ["", ""], correct: "" }]);
-  const [isPublished, setIsPublished] = useState(false);
   const router = useRouter();
+  const [title, setTitle] = useState("");
+  const [questions, setQuestions] = useState([]);
+  const [isPublished, setIsPublished] = useState(false);
 
-  // Tambah pertanyaan baru
-  const addQuestion = () => {
-    setQuestions([...questions, { question: "", options: ["", ""], correct: "" }]);
-  };
-
-  // Tambah opsi jawaban pada pertanyaan tertentu
-  const addOption = (index) => {
+  const addQuestion = () => setQuestions([...questions, { question: "", options: ["", ""], correct: "" }]);
+  const addOption = (qIndex) => {
     const newQuestions = [...questions];
-    newQuestions[index].options.push("");
+    newQuestions[qIndex].options.push("");
     setQuestions(newQuestions);
   };
-
-  // Update pertanyaan / opsi / jawaban benar
-  const handleQuestionChange = (index, value) => {
+  const handleQuestionChange = (qIndex, value) => {
     const newQuestions = [...questions];
-    newQuestions[index].question = value;
+    newQuestions[qIndex].question = value;
     setQuestions(newQuestions);
   };
-
   const handleOptionChange = (qIndex, oIndex, value) => {
     const newQuestions = [...questions];
     newQuestions[qIndex].options[oIndex] = value;
     setQuestions(newQuestions);
   };
-
   const handleCorrectChange = (qIndex, value) => {
     const newQuestions = [...questions];
     newQuestions[qIndex].correct = value;
@@ -44,17 +35,15 @@ export default function CreateQuiz() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title.trim()) return alert("Judul quiz wajib diisi");
-
     try {
       await addDoc(collection(db, "quizzes"), {
         title,
         questions,
         authorId: auth.currentUser.uid,
         authorName: auth.currentUser.displayName || "Anonymous",
-        timestamp: Date.now(),
-        isPublished // true = publik, false = draft
+        isPublished
       });
-      alert("Quiz berhasil dibuat!");
+      alert(isPublished ? "Quiz berhasil dipublikasikan" : "Quiz disimpan sebagai draft");
       router.push("/dashboard");
     } catch (error) {
       console.error(error);
@@ -70,75 +59,32 @@ export default function CreateQuiz() {
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
             <label className="form-label">Judul Quiz</label>
-            <input
-              type="text"
-              className="form-control"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
+            <input type="text" className="form-control" value={title} onChange={e => setTitle(e.target.value)} required />
           </div>
 
           {questions.map((q, qIndex) => (
             <div key={qIndex} className="mb-4 border p-3 rounded">
               <label className="form-label">Pertanyaan {qIndex + 1}</label>
-              <input
-                type="text"
-                className="form-control mb-2"
-                value={q.question}
-                onChange={(e) => handleQuestionChange(qIndex, e.target.value)}
-                required
-              />
+              <input type="text" className="form-control mb-2" value={q.question} onChange={e => handleQuestionChange(qIndex, e.target.value)} required />
 
               {q.options.map((opt, oIndex) => (
-                <div key={oIndex} className="mb-2 d-flex gap-2">
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder={`Opsi ${oIndex + 1}`}
-                    value={opt}
-                    onChange={(e) => handleOptionChange(qIndex, oIndex, e.target.value)}
-                    required
-                  />
-                </div>
+                <input key={oIndex} type="text" className="form-control mb-2" placeholder={`Opsi ${oIndex + 1}`} value={opt} onChange={e => handleOptionChange(qIndex, oIndex, e.target.value)} required />
               ))}
 
-              <button type="button" className="btn btn-sm btn-secondary mb-2" onClick={() => addOption(qIndex)}>
-                Tambah Opsi
-              </button>
+              <button type="button" className="btn btn-sm btn-secondary mb-2" onClick={() => addOption(qIndex)}>Tambah Opsi</button>
 
-              <div className="mb-2">
-                <label className="form-label">Jawaban Benar</label>
-                <select
-                  className="form-select"
-                  value={q.correct}
-                  onChange={(e) => handleCorrectChange(qIndex, e.target.value)}
-                  required
-                >
-                  <option value="">Pilih jawaban benar</option>
-                  {q.options.map((opt, idx) => (
-                    <option key={idx} value={opt}>{opt}</option>
-                  ))}
-                </select>
-              </div>
+              <select className="form-select" value={q.correct} onChange={e => handleCorrectChange(qIndex, e.target.value)} required>
+                <option value="">Pilih jawaban benar</option>
+                {q.options.map((opt, idx) => <option key={idx} value={opt}>{opt}</option>)}
+              </select>
             </div>
           ))}
 
-          <button type="button" className="btn btn-outline-primary mb-3" onClick={addQuestion}>
-            Tambah Pertanyaan
-          </button>
+          <button type="button" className="btn btn-outline-primary mb-3" onClick={addQuestion}>Tambah Pertanyaan</button>
 
           <div className="form-check mb-3">
-            <input
-              className="form-check-input"
-              type="checkbox"
-              checked={isPublished}
-              onChange={(e) => setIsPublished(e.target.checked)}
-              id="publishCheck"
-            />
-            <label className="form-check-label" htmlFor="publishCheck">
-              Publikasikan Quiz
-            </label>
+            <input className="form-check-input" type="checkbox" checked={isPublished} onChange={e => setIsPublished(e.target.checked)} id="publishCheck" />
+            <label className="form-check-label" htmlFor="publishCheck">Publikasikan Quiz</label>
           </div>
 
           <button type="submit" className="btn btn-success">Simpan Quiz</button>

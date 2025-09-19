@@ -44,7 +44,7 @@ export default function Dashboard() {
       setQuizCreated(
         quizCreated.map(q => q.id === quizId ? { ...q, isPublished: !currentStatus } : q)
       );
-      alert(`Quiz berhasil ${currentStatus ? "dinonaktifkan" : "dipublikasikan"}`);
+      alert(`Quiz berhasil ${currentStatus ? "dinonaktifkan (Draft)" : "dipublikasikan"}`);
     } catch (error) {
       console.error(error);
       alert("Gagal mengubah status publikasi quiz");
@@ -59,7 +59,7 @@ export default function Dashboard() {
       <div className="container mt-5">
         <h2>Dashboard</h2>
         <Link href="/dashboard/create-quiz" className="btn btn-success mb-3">Buat Quiz Baru</Link>
-        <Link href="/dashboard/profile" className="btn btn-primary mb-3 ms-3">Profil Saya</Link>
+        <Link href="/dashboard/profie" className="btn ms-3 btn-primary mb-3">Profile</Link>
 
         {quizCreated.length === 0 ? (
           <p>Belum membuat quiz</p>
@@ -80,7 +80,7 @@ export default function Dashboard() {
                     {q.isPublished ? (
                       <span className="badge bg-success">Sudah Publik</span>
                     ) : (
-                      <span className="badge bg-secondary">Belum Publik</span>
+                      <span className="badge bg-secondary">Draft</span>
                     )}
                   </td>
                   <td>
