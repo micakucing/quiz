@@ -28,8 +28,9 @@ export default function Home() {
         ) : (
           <div className="list-group">
             {publicQuizzes.map(q => (
-              <Link key={q.id} href={`/quiz/${q.id}`} className="list-group-item list-group-item-action">
-                {q.title} - <small>oleh {q.authorName}</small>
+              <Link key={q.id} href={`/quiz/${q.id}`} className="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                <span>{q.title} - <small>oleh {q.authorName}</small></span>
+                {q.isPublished && <span className="badge bg-success">Sudah Publik</span>}
               </Link>
             ))}
           </div>
