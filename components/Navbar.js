@@ -24,7 +24,7 @@ export default function Navbar() {
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
       <div className="container">
-        <Link href="/" className="navbar-brand">QuizApp</Link>
+        <Link href="/" className="navbar-brand">Kuisi</Link>
         <div>
           {user ? (
             <>
