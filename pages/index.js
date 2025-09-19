@@ -1,89 +1,39 @@
 import { useEffect, useState } from "react";
-import { collection, query, where, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";
-import { db, auth } from "../../lib/firebase";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../lib/firebase";
 import Link from "next/link";
-import Navbar from "../../components/Navbar";
+import Navbar from "../components/Navbar";
 
-export default function Dashboard() {
-  const [quizCreated, setQuizCreated] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function Home() {
+  const [quizzes, setQuizzes] = useState([]);
 
   useEffect(() => {
-    if (!auth.currentUser) return;
-    fetchQuizCreated(auth.currentUser.uid);
+    const fetchQuizzes = async () => {
+      const q = query(collection(db, "quizzes"), where("published", "==", true));
+      const snap = await getDocs(q);
+      const quizList = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setQuizzes(quizList);
+    };
+
+    fetchQuizzes();
   }, []);
-
-  const fetchQuizCreated = async (uid) => {
-    try {
-      const q = query(collection(db, "quizzes"), where("authorId", "==", uid));
-      const snapshot = await getDocs(q);
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setQuizCreated(data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDeleteQuiz = async (quizId) => {
-    if (!confirm("Yakin ingin menghapus quiz ini?")) return;
-    try {
-      await deleteDoc(doc(db, "quizzes", quizId));
-      setQuizCreated(quizCreated.filter(q => q.id !== quizId));
-      alert("Quiz berhasil dihapus");
-    } catch (error) {
-      console.error(error);
-      alert("Gagal menghapus quiz");
-    }
-  };
-
-  const handlePublishQuiz = async (quizId) => {
-    if (!confirm("Yakin ingin mempublikasikan quiz ini?")) return;
-    try {
-      await updateDoc(doc(db, "quizzes", quizId), { isPublished: true });
-      setQuizCreated(quizCreated.map(q => q.id === quizId ? { ...q, isPublished: true } : q));
-      alert("Quiz berhasil dipublikasikan!");
-    } catch (error) {
-      console.error(error);
-      alert("Gagal mempublikasikan quiz");
-    }
-  };
-
-  if (loading) return <p>Loading...</p>;
 
   return (
     <>
       <Navbar />
       <div className="container mt-5">
-        <h2>Dashboard</h2>
-        <Link href="/dashboard/create-quiz" className="btn btn-success mb-3">Buat Quiz Baru</Link>
-
-        {quizCreated.length === 0 ? (
-          <p>Belum membuat quiz</p>
+        <h2>Daftar Quiz Publik</h2>
+        {quizzes.length === 0 ? (
+          <p>Tidak ada quiz yang tersedia saat ini.</p>
         ) : (
-          <table className="table table-bordered">
-            <thead>
-              <tr>
-                <th>Judul Quiz</th>
-                <th>Status</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {quizCreated.map(q => (
-                <tr key={q.id}>
-                  <td>{q.title}</td>
-                  <td>{q.isPublished ? <span className="badge bg-success">Sudah Publik</span> : <span className="badge bg-secondary">Belum Publik</span>}</td>
-                  <td>
-                    <Link href={`/dashboard/edit-quiz/${q.id}`} className="btn btn-sm btn-primary me-2">Edit</Link>
-                    <button className="btn btn-sm btn-danger me-2" onClick={() => handleDeleteQuiz(q.id)}>Hapus</button>
-                    {!q.isPublished && <button className="btn btn-sm btn-success" onClick={() => handlePublishQuiz(q.id)}>Publikasikan</button>}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <ul className="list-group">
+            {quizzes.map(quiz => (
+              <li key={quiz.id} className="list-group-item d-flex justify-content-between align-items-center">
+                <Link href={`/quiz/${quiz.id}`}>{quiz.title}</Link>
+                <span className="badge bg-primary rounded-pill">{quiz.questions.length} Pertanyaan</span>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
     </>
