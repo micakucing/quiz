@@ -114,8 +114,8 @@ export default function Dashboard() {
                     )}
                   </td>
                   <td>
-                    <Link href={`/dashboard/edit-quiz/${q.id}`} className="btn btn-sm btn-primary me-2">Edit</Link>
-                    <button className="btn btn-sm btn-danger me-2" onClick={() => handleDeleteQuiz(q.id)}>Hapus</button>
+                    <Link href={`/dashboard/edit-quiz/${q.id}`} className="btn btn-sm btn-primary me-2 mb-xl-0 mb-2">Edit</Link>
+                    <button className="btn btn-sm btn-danger me-2  me-2 mb-xl-0 mb-2" onClick={() => handleDeleteQuiz(q.id)}>Hapus</button>
                     <button
                       className={`btn btn-sm ${q.isPublished ? "btn-warning" : "btn-success"}`}
                       onClick={() => handleTogglePublish(q.id, q.isPublished)}
