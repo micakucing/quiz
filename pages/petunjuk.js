@@ -78,7 +78,7 @@ export default function Petunjuk() {
             </h2>
             <div id="collapseFive" className="accordion-collapse collapse" data-bs-parent="#petunjukAccordion">
               <div className="accordion-body bg-secondary bg-opacity-10">
-                Klik tombol <Link href="/profile">Profile</Link> untuk melihat quiz yang sudah dibuat, quiz yang sudah dijawab, dan mengedit data diri seperti nama, email, atau reset password.
+                Klik tombol <Link href="/dashboard/profile">Profile</Link> untuk melihat quiz yang sudah dibuat, quiz yang sudah dijawab, dan mengedit data diri seperti nama, email, atau reset password.
               </div>
             </div>
           </div>
