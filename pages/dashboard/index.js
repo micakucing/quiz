@@ -6,6 +6,8 @@ import Link from "next/link";
 
 export default function Dashboard() {
   const [quizCreated, setQuizCreated] = useState([]);
+  const [filteredQuizzes, setFilteredQuizzes] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -13,12 +15,21 @@ export default function Dashboard() {
     fetchQuizCreated(auth.currentUser.uid);
   }, []);
 
+  useEffect(() => {
+    const term = searchTerm.toLowerCase();
+    const filtered = quizCreated.filter(q =>
+      q.title.toLowerCase().includes(term)
+    );
+    setFilteredQuizzes(filtered);
+  }, [searchTerm, quizCreated]);
+
   const fetchQuizCreated = async (uid) => {
     try {
       const q = query(collection(db, "quizzes"), where("authorId", "==", uid));
       const snapshot = await getDocs(q);
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setQuizCreated(data);
+      setFilteredQuizzes(data);
     } catch (error) {
       console.error(error);
     } finally {
@@ -31,6 +42,7 @@ export default function Dashboard() {
     try {
       await deleteDoc(doc(db, "quizzes", quizId));
       setQuizCreated(quizCreated.filter(q => q.id !== quizId));
+      setFilteredQuizzes(filteredQuizzes.filter(q => q.id !== quizId));
       alert("Quiz berhasil dihapus");
     } catch (error) {
       console.error(error);
@@ -41,9 +53,9 @@ export default function Dashboard() {
   const handleTogglePublish = async (quizId, currentStatus) => {
     try {
       await updateDoc(doc(db, "quizzes", quizId), { isPublished: !currentStatus });
-      setQuizCreated(
-        quizCreated.map(q => q.id === quizId ? { ...q, isPublished: !currentStatus } : q)
-      );
+      const updated = quizCreated.map(q => q.id === quizId ? { ...q, isPublished: !currentStatus } : q);
+      setQuizCreated(updated);
+      setFilteredQuizzes(updated.filter(q => q.title.toLowerCase().includes(searchTerm.toLowerCase())));
       alert(`Quiz berhasil ${currentStatus ? "dinonaktifkan (Draft)" : "dipublikasikan"}`);
     } catch (error) {
       console.error(error);
@@ -59,10 +71,21 @@ export default function Dashboard() {
       <div className="container mt-5">
         <h2>Dashboard</h2>
         <Link href="/dashboard/create-quiz" className="btn btn-success mb-3">Buat Quiz Baru</Link>
-        <Link href="/dashboard/profie" className="btn ms-3 btn-primary mb-3">Profile</Link>
+        <Link href="/dashboard/profile" className="btn ms-3 btn-primary mb-3">Profile</Link>
 
-        {quizCreated.length === 0 ? (
-          <p>Belum membuat quiz</p>
+        {/* Search input */}
+        <div className="mb-3">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Cari quiz berdasarkan judul..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        {filteredQuizzes.length === 0 ? (
+          <p>Tidak ada quiz yang sesuai</p>
         ) : (
           <table className="table table-bordered">
             <thead>
@@ -73,7 +96,7 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {quizCreated.map(q => (
+              {filteredQuizzes.map(q => (
                 <tr key={q.id}>
                   <td>{q.title}</td>
                   <td>
