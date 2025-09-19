@@ -3,7 +3,7 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import Link from "next/link";
 import Navbar from "../components/Navbar";
-import LoadingOverlay from "../components/LoadingOverlay";
+import LoadingOverlay from "../components/Loadding";
 
 export default function Home() {
   const [publicQuizzes, setPublicQuizzes] = useState([]);
