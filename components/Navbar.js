@@ -32,7 +32,7 @@ export default function Navbar() {
 
               <Link href="/dashboard" className="btn btn-sm btn-primary me-2">Dashboard</Link>
               <Link href="/leaderboard" className="btn btn-sm btn-info me-2">Leaderboard</Link>
-              <button className="btn btn-sm btn-danger" onClick={() => handleLogout()}>Logout</button>
+              <button className="btn btn-sm btn-danger mt-xl-0 mt-2" onClick={() => handleLogout()}>Logout</button>
             </>
           ) : (
             <>
