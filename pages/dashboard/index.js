@@ -93,6 +93,7 @@ export default function Dashboard() {
         {filteredQuizzes.length === 0 ? (
           <p>Tidak ada quiz yang sesuai</p>
         ) : (
+              <div className="table-responsive">
           <table className="table table-bordered">
             <thead>
               <tr>
@@ -126,6 +127,7 @@ export default function Dashboard() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
       </Layout>
