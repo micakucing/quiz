@@ -72,7 +72,7 @@ export default function Dashboard() {
 
   return (
     <>
-             <Layout title="Kuisi Publik | Dashboard " description="Buat dan jawab quiz publik dengan user lain" loading={loading}>
+             <Layout title="Kuisi Publik | Dashboard " description="Buat dan jawab quiz publik dengan user lain" >
     
       <div className="container mt-5">
         <h2>Dashboard</h2>
