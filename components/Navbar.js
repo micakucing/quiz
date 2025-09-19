@@ -28,9 +28,9 @@ export default function Navbar() {
         <div>
           {user ? (
             <>
-              <Link href="/petunjuk" className="btn btn-sm btn-warning me-2">Pentunjuk</Link>
+              <Link href="/petunjuk" className="btn btn-sm btn-warning me-2 mt-md-0 mt-sm-2 mt-2 mt-lg-0">Pentunjuk</Link>
 
-              <Link href="/dashboard" className="btn btn-sm btn-primary me-2">Dashboard</Link>
+              <Link href="/dashboard" className="btn btn-sm btn-primary me-2 mt-md-0 mt-sm-2 mt-2 mt-lg-0">Dashboard</Link>
               <Link href="/leaderboard" className="btn btn-sm btn-info me-2 mt-md-0 mt-sm-2 mt-2 mt-lg-0">Leaderboard</Link>
               <button className="btn btn-sm btn-danger mt-md-0 mt-sm-2 mt-2 mt-lg-0" onClick={() => handleLogout()}>Logout</button>
             </>
