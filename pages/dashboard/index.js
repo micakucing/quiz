@@ -1,95 +1,102 @@
 import { useEffect, useState } from "react";
+import { collection, query, where, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "../../lib/firebase";
-import { collection, query, where, getDocs, updateDoc, deleteDoc, doc, addDoc, serverTimestamp } from "firebase/firestore";
 import Navbar from "../../components/Navbar";
-import { useRouter } from "next/router";
 import Link from "next/link";
-export default function Dashboard() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [quizzes, setQuizzes] = useState([]);
-  const [title, setTitle] = useState("");
-  const [questions, setQuestions] = useState([{ question: "", options: ["", ""], answer: "" }]);
-  const [editId, setEditId] = useState(null); // id quiz yang sedang diedit
-  const router = useRouter();
 
-  // Listen auth state
+export default function Dashboard() {
+  const [quizCreated, setQuizCreated] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(u => {
-      setUser(u);
-      setLoading(false);
-    });
-    return () => unsubscribe();
+    if (!auth.currentUser) return;
+    fetchQuizCreated(auth.currentUser.uid);
   }, []);
 
-  // Fetch quiz user
-  useEffect(() => {
-    if (!user) return;
-
-    const fetchUserQuizzes = async () => {
-      const q = query(collection(db, "quizzes"), where("creatorId", "==", user.uid));
-      const snap = await getDocs(q);
-      setQuizzes(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    };
-
-    fetchUserQuizzes();
-  }, [user]);
- 
-
-  const handleEditQuiz = (quiz) => {
-    setEditId(quiz.id);
-    setTitle(quiz.title);
-    setQuestions(quiz.questions);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  const fetchQuizCreated = async (uid) => {
+    try {
+      const q = query(collection(db, "quizzes"), where("authorId", "==", uid));
+      const snapshot = await getDocs(q);
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setQuizCreated(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDeleteQuiz = async (quizId) => {
-    if (!confirm("Apakah Anda yakin ingin menghapus quiz ini?")) return;
-    await deleteDoc(doc(db, "quizzes", quizId));
-    setQuizzes(quizzes.filter(q => q.id !== quizId));
-    alert("Quiz berhasil dihapus!");
+    if (!confirm("Yakin ingin menghapus quiz ini?")) return;
+    try {
+      await deleteDoc(doc(db, "quizzes", quizId));
+      setQuizCreated(quizCreated.filter(q => q.id !== quizId));
+      alert("Quiz berhasil dihapus");
+    } catch (error) {
+      console.error(error);
+      alert("Gagal menghapus quiz");
+    }
   };
 
-  const togglePublish = async (quizId, current) => {
-    await updateDoc(doc(db, "quizzes", quizId), { published: !current });
-    setQuizzes(quizzes.map(q => q.id === quizId ? { ...q, published: !current } : q));
+  const handleTogglePublish = async (quizId, currentStatus) => {
+    try {
+      await updateDoc(doc(db, "quizzes", quizId), { isPublished: !currentStatus });
+      setQuizCreated(
+        quizCreated.map(q => q.id === quizId ? { ...q, isPublished: !currentStatus } : q)
+      );
+      alert(`Quiz berhasil ${currentStatus ? "dinonaktifkan" : "dipublikasikan"}`);
+    } catch (error) {
+      console.error(error);
+      alert("Gagal mengubah status publikasi quiz");
+    }
   };
 
   if (loading) return <p>Loading...</p>;
-  if (!user) return <p>Silakan login untuk mengakses dashboard.</p>;
 
   return (
     <>
       <Navbar />
       <div className="container mt-5">
-        <h2>Dashboard User</h2>
- <div className="d-flex flex-column gap-3 mt-4">
-          <Link href="/dashboard/profile" className="btn btn-primary">Lihat Profile</Link>
-          <Link href="/dashboard/create-quiz" className="btn btn-success">Buat Quiz Baru</Link>
-        </div>
-       
-        {/* Daftar Quiz User */}
-        <h4>Quiz Saya</h4>
-        {quizzes.length === 0 ? (
-          <p>Belum ada quiz.</p>
+        <h2>Dashboard</h2>
+        <Link href="/dashboard/create-quiz" className="btn btn-success mb-3">Buat Quiz Baru</Link>
+        <Link href="/dashboard/profile" className="btn btn-primary mb-3 ms-3">Profil Saya</Link>
+
+        {quizCreated.length === 0 ? (
+          <p>Belum membuat quiz</p>
         ) : (
-          <ul className="list-group">
-            {quizzes.map(q => (
-              <li key={q.id} className="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                  <span>{q.title}</span>
-                  <p className="mb-0 text-muted" style={{ fontSize: "0.9rem" }}>Pertanyaan: {q.questions.length}</p>
-                </div>
-                <div>
-                  <button className={`btn btn-sm me-1 ${q.published ? "btn-success" : "btn-secondary"}`} onClick={() => togglePublish(q.id, q.published)}>
-                    {q.published ? "Dipublikasikan" : "Publish"}
-                  </button>
-                  <button className="btn btn-sm btn-info me-1" onClick={() => handleEditQuiz(q)}>Edit</button>
-                  <button className="btn btn-sm btn-danger" onClick={() => handleDeleteQuiz(q.id)}>Hapus</button>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <table className="table table-bordered">
+            <thead>
+              <tr>
+                <th>Judul Quiz</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {quizCreated.map(q => (
+                <tr key={q.id}>
+                  <td>{q.title}</td>
+                  <td>
+                    {q.isPublished ? (
+                      <span className="badge bg-success">Sudah Publik</span>
+                    ) : (
+                      <span className="badge bg-secondary">Belum Publik</span>
+                    )}
+                  </td>
+                  <td>
+                    <Link href={`/dashboard/edit-quiz/${q.id}`} className="btn btn-sm btn-primary me-2">Edit</Link>
+                    <button className="btn btn-sm btn-danger me-2" onClick={() => handleDeleteQuiz(q.id)}>Hapus</button>
+                    <button
+                      className={`btn btn-sm ${q.isPublished ? "btn-warning" : "btn-success"}`}
+                      onClick={() => handleTogglePublish(q.id, q.isPublished)}
+                    >
+                      {q.isPublished ? "Unpublish" : "Publikasikan"}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
     </>

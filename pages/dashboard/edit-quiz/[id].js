@@ -1,31 +1,46 @@
-import { useState } from "react";
-import { collection, addDoc } from "firebase/firestore";
-import { db, auth } from "../../lib/firebase";
-import Navbar from "../../components/Navbar";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { db, auth } from "../../../lib/firebase";
+import Navbar from "../../../components/Navbar";
 
-export default function CreateQuiz() {
-  const [title, setTitle] = useState("");
-  const [questions, setQuestions] = useState([{ question: "", options: ["", ""], correct: "" }]);
-  const [isPublished, setIsPublished] = useState(false);
+export default function EditQuiz() {
   const router = useRouter();
+  const { id } = router.query;
 
-  // Tambah pertanyaan baru
-  const addQuestion = () => {
-    setQuestions([...questions, { question: "", options: ["", ""], correct: "" }]);
+  const [title, setTitle] = useState("");
+  const [questions, setQuestions] = useState([]);
+  const [isPublished, setIsPublished] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!id) return;
+    fetchQuiz();
+  }, [id]);
+
+  const fetchQuiz = async () => {
+    try {
+      const quizRef = doc(db, "quizzes", id);
+      const docSnap = await getDoc(quizRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setTitle(data.title);
+        setQuestions(data.questions);
+        setIsPublished(data.isPublished || false);
+      } else {
+        alert("Quiz tidak ditemukan");
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Tambah opsi jawaban pada pertanyaan tertentu
-  const addOption = (index) => {
+  const handleQuestionChange = (qIndex, value) => {
     const newQuestions = [...questions];
-    newQuestions[index].options.push("");
-    setQuestions(newQuestions);
-  };
-
-  // Update pertanyaan / opsi / jawaban benar
-  const handleQuestionChange = (index, value) => {
-    const newQuestions = [...questions];
-    newQuestions[index].question = value;
+    newQuestions[qIndex].question = value;
     setQuestions(newQuestions);
   };
 
@@ -41,32 +56,41 @@ export default function CreateQuiz() {
     setQuestions(newQuestions);
   };
 
+  const addQuestion = () => {
+    setQuestions([...questions, { question: "", options: ["", ""], correct: "" }]);
+  };
+
+  const addOption = (qIndex) => {
+    const newQuestions = [...questions];
+    newQuestions[qIndex].options.push("");
+    setQuestions(newQuestions);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title.trim()) return alert("Judul quiz wajib diisi");
-
     try {
-      await addDoc(collection(db, "quizzes"), {
+      const quizRef = doc(db, "quizzes", id);
+      await updateDoc(quizRef, {
         title,
         questions,
-        authorId: auth.currentUser.uid,
-        authorName: auth.currentUser.displayName || "Anonymous",
-        timestamp: Date.now(),
-        isPublished // true = publik, false = draft
+        isPublished
       });
-      alert("Quiz berhasil dibuat!");
+      alert("Quiz berhasil diperbarui!");
       router.push("/dashboard");
     } catch (error) {
       console.error(error);
-      alert("Gagal membuat quiz");
+      alert("Gagal memperbarui quiz");
     }
   };
+
+  if (loading) return <p>Loading...</p>;
 
   return (
     <>
       <Navbar />
       <div className="container mt-5">
-        <h2>Buat Quiz Baru</h2>
+        <h2>Edit Quiz</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
             <label className="form-label">Judul Quiz</label>
@@ -141,7 +165,7 @@ export default function CreateQuiz() {
             </label>
           </div>
 
-          <button type="submit" className="btn btn-success">Simpan Quiz</button>
+          <button type="submit" className="btn btn-success">Update Quiz</button>
         </form>
       </div>
     </>

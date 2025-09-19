@@ -5,35 +5,34 @@ import Link from "next/link";
 import Navbar from "../components/Navbar";
 
 export default function Home() {
-  const [quizzes, setQuizzes] = useState([]);
+  const [publicQuizzes, setPublicQuizzes] = useState([]);
 
   useEffect(() => {
-    const fetchQuizzes = async () => {
-      const q = query(collection(db, "quizzes"), where("published", "==", true));
-      const snap = await getDocs(q);
-      const quizList = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setQuizzes(quizList);
-    };
-
-    fetchQuizzes();
+    fetchPublicQuizzes();
   }, []);
+
+  const fetchPublicQuizzes = async () => {
+    const q = query(collection(db, "quizzes"), where("isPublished", "==", true));
+    const snapshot = await getDocs(q);
+    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setPublicQuizzes(data);
+  };
 
   return (
     <>
       <Navbar />
       <div className="container mt-5">
-        <h2>Daftar Quiz Publik</h2>
-        {quizzes.length === 0 ? (
-          <p>Tidak ada quiz yang tersedia saat ini.</p>
+        <h2>Quiz Publik</h2>
+        {publicQuizzes.length === 0 ? (
+          <p>Belum ada quiz yang dipublikasikan</p>
         ) : (
-          <ul className="list-group">
-            {quizzes.map(quiz => (
-              <li key={quiz.id} className="list-group-item d-flex justify-content-between align-items-center">
-                <Link href={`/quiz/${quiz.id}`}>{quiz.title}</Link>
-                <span className="badge bg-primary rounded-pill">{quiz.questions.length} Pertanyaan</span>
-              </li>
+          <div className="list-group">
+            {publicQuizzes.map(q => (
+              <Link key={q.id} href={`/quiz/${q.id}`} className="list-group-item list-group-item-action">
+                {q.title} - <small>oleh {q.authorName}</small>
+              </Link>
             ))}
-          </ul>
+          </div>
         )}
       </div>
     </>
