@@ -111,8 +111,7 @@ export default function Profile() {
 
   if (loading) return <div className="container mt-5">
     <p>Loading...</p> </div>;
-  if (!user) return <div className="container mt-5">
-    <p>Silakan login untuk melihat profile.</p> </div>;
+  if (!user) return <div className="container mt-5"><p>Silakan <Link href="/login">login</Link> untuk melihat profile.</p> </div>;
 
   return (
     <>

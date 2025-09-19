@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Layout from "../../components/Layout";
 import { auth, db } from "../../lib/firebase";
+import Link from 'next/link';
 import {
   doc,
   getDoc,
@@ -85,7 +86,8 @@ export default function QuizPage() {
 
   if (loading) return <LoadingOverlay show={true} />;
   if (!quiz) return <p className="text-center mt-5">Quiz tidak ditemukan</p>;
-  if (!user) return <p className="text-center mt-5">Silahkan login untuk menjawab quiz</p>;
+  if (!user) return  <Layout title="Halaman ini tidak bisa di akses" description="Buat dan jawab quiz publik dengan user lain" loading={loading}><div className="container mt-5"><p>Silakan <Link href="/login">login</Link> untuk melihat profile.</p> </div></Layout>
+;
 
   // Handle pilih jawaban
   const handleSelect = (qIndex, optionIndex) => {
