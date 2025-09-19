@@ -1,42 +1,22 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+.navbar {
+  font-family: 'Poppins', sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.nav-link {
+  font-weight: 500;
+  color: #444 !important;
 }
 
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
+.nav-link:hover {
+  color: #0d6efd !important; /* warna biru bootstrap */
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+.table th, .table td {
+  vertical-align: middle;
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+h3 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  color: #444;
 }
