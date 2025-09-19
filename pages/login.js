@@ -41,7 +41,7 @@ export default function Login() {
     }
   };
 
-  return (
+return (
     <>
       <Navbar />
       <div className="container mt-5">
