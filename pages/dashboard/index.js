@@ -3,72 +3,71 @@ import { collection, query, where, getDocs, doc, updateDoc, deleteDoc } from "fi
 import { db, auth } from "../../lib/firebase";
 import Layout from "../../components/Layout";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
+// Loading overlay
+function LoadingOverlay({ show }) {
+  if (!show) return null;
+  return (
+    <div
+      className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+      style={{ backgroundColor: "rgba(0,0,0,0.4)", zIndex: 1050 }}
+    >
+      <div className="text-center">
+        <div className="spinner-border text-light" style={{ width: "4rem", height: "4rem" }} role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+        <div className="mt-3 text-white">Loading Dashboard...</div>
+      </div>
+    </div>
+  );
+}
 export default function Dashboard() {
-  const [quizCreated, setQuizCreated] = useState([]);
-  const [filteredQuizzes, setFilteredQuizzes] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
+ const router = useRouter();
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState(""); // <--- state searchTerm
+  const [quizzes, setQuizzes] = useState([]);
+  // Filter quizzes
+  const filteredQuizzes = quizzes.filter(q =>
+    q.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
+  // Check auth
   useEffect(() => {
-    if (!auth.currentUser) return;
-    fetchQuizCreated(auth.currentUser.uid);
-  }, []);
-
-  useEffect(() => {
-    const term = searchTerm.toLowerCase();
-    const filtered = quizCreated.filter(q =>
-      q.title.toLowerCase().includes(term)
-    );
-    setFilteredQuizzes(filtered);
-  }, [searchTerm, quizCreated]);
-
-  const fetchQuizCreated = async (uid) => {
-    try {
-      const q = query(collection(db, "quizzes"), where("authorId", "==", uid));
-      const snapshot = await getDocs(q);
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setQuizCreated(data);
-      setFilteredQuizzes(data);
-    } catch (error) {
-      console.error(error);
-    } finally {
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+      } else {
+        router.push("/login"); // redirect jika belum login
+      }
       setLoading(false);
-    }
-  };
+    });
+    return () => unsubscribe();
+  }, [router]);
 
-  const handleDeleteQuiz = async (quizId) => {
-    if (!confirm("Yakin ingin menghapus quiz ini?")) return;
-    try {
-      await deleteDoc(doc(db, "quizzes", quizId));
-      setQuizCreated(quizCreated.filter(q => q.id !== quizId));
-      setFilteredQuizzes(filteredQuizzes.filter(q => q.id !== quizId));
-      alert("Quiz berhasil dihapus");
-    } catch (error) {
-      console.error(error);
-      alert("Gagal menghapus quiz");
-    }
-  };
+  // Fetch quizzes after user is ready
+  useEffect(() => {
+    if (!user) return; // tunggu user
 
-  const handleTogglePublish = async (quizId, currentStatus) => {
-    try {
-      await updateDoc(doc(db, "quizzes", quizId), { isPublished: !currentStatus });
-      const updated = quizCreated.map(q => q.id === quizId ? { ...q, isPublished: !currentStatus } : q);
-      setQuizCreated(updated);
-      setFilteredQuizzes(updated.filter(q => q.title.toLowerCase().includes(searchTerm.toLowerCase())));
-      alert(`Quiz berhasil ${currentStatus ? "dinonaktifkan (Draft)" : "dipublikasikan"}`);
-    } catch (error) {
-      console.error(error);
-      alert("Gagal mengubah status publikasi quiz");
-    }
-  };
+    const fetchQuizzes = async () => {
+      setLoading(true);
+      try {
+        const q = query(collection(db, "quizzes"), where("authorId", "==", user.uid));
+        const snapshot = await getDocs(q);
+        const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        setQuizzes(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (loading) return 
-        <div className="container mt-5">
+    fetchQuizzes();
+  }, [user]);
 
-  <p>Loading...</p>
-  </div>
-  ;
+  if (loading) return <LoadingOverlay show={true} />;
 
   return (
     <>
