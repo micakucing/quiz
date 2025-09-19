@@ -1,10 +1,11 @@
-import Navbar from "../components/Navbar";
+import Layout from "../components/Layout";
 import Link from "next/link";
 
 export default function Petunjuk() {
   return (
     <>
-      <Navbar />
+            <Layout title="FAQ | Pertanyaan yang sering di tanyakan" description="Buat dan jawab quiz publik dengan user lain">
+   
       <div className="container mt-5 mb-5">
         <h2>Petunjuk Penggunaan</h2>
         <hr />
@@ -104,10 +105,7 @@ export default function Petunjuk() {
           <Link href="/" className="btn btn-primary">Kembali ke Halaman Utama</Link>
         </div>
       </div>
-
-      <footer className="bg-light text-center py-3">
-        @ramahardian.my.id
-      </footer>
+ </Layout>
     </>
   );
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import Navbar from "../components/Navbar";
+import Layout from "../components/Layout";
 
 export default function Leaderboard() {
   const [users, setUsers] = useState([]);
@@ -24,7 +24,8 @@ export default function Leaderboard() {
 
   return (
     <>
-      <Navbar />
+            <Layout title="Kuisi Publik | Peringkat Terbaik" description="Peringkat penjawab pertanyaan terbaik" loading={loading}>
+
       <div className="container mt-5">
         <h2>Leaderboard Quiz</h2>
         {users.length === 0 ? (
@@ -52,6 +53,7 @@ export default function Leaderboard() {
           </table>
         )}
       </div>
+      </Layout>
     </>
   );
 }

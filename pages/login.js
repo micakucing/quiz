@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { auth } from "../lib/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import Navbar from "../components/Navbar";
+import Layout from "../components/Layout";
 import { useRouter } from "next/router";
 
 export default function Login() {
@@ -43,7 +43,8 @@ export default function Login() {
 
 return (
     <>
-      <Navbar />
+             <Layout title="Kuisi Publik | halaman login" description="Buat dan jawab quiz publik dengan user lain" loading={loading}>
+
       <div className="container mt-5">
         <h2>Login</h2>
         <form onSubmit={handleLogin}>
@@ -66,6 +67,7 @@ return (
           </div>
         </div>
       </div>
+      </Layout>
     </>
   );
 }

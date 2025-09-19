@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import Link from "next/link";
-import Navbar from "../components/Navbar";
-import LoadingOverlay from "../components/Loadding";
-
+import Layout from "../components/Layout";
+ 
 export default function Home() {
   const [publicQuizzes, setPublicQuizzes] = useState([]);
   const [filteredQuizzes, setFilteredQuizzes] = useState([]);
@@ -73,8 +72,7 @@ export default function Home() {
 
   return (
     <>
-      <Navbar />
-      <LoadingOverlay show={loading} />
+         <Layout title="Kuisi Publik" description="Buat dan jawab quiz publik dengan user lain" loading={loading}>
 
       <div className="container mt-5 mb-5">
         <h2>Kuisi Publik</h2>
@@ -140,9 +138,7 @@ export default function Home() {
         )}
       </div>
 
-      <footer className="bg-light text-center py-3">
-        @ramahardian.my.id
-      </footer>
+</Layout>
     </>
   );
 }

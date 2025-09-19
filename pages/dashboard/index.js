@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { collection, query, where, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "../../lib/firebase";
-import Navbar from "../../components/Navbar";
+import Layout from "../../components/Layout";
 import Link from "next/link";
 
 export default function Dashboard() {
@@ -63,11 +63,17 @@ export default function Dashboard() {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return 
+        <div className="container mt-5">
+
+  <p>Loading...</p>
+  </div>
+  ;
 
   return (
     <>
-      <Navbar />
+             <Layout title="Kuisi Publik | Dashboard " description="Buat dan jawab quiz publik dengan user lain" loading={loading}>
+    
       <div className="container mt-5">
         <h2>Dashboard</h2>
         <Link href="/dashboard/create-quiz" className="btn btn-success mb-3">Buat Quiz Baru</Link>
@@ -122,6 +128,7 @@ export default function Dashboard() {
           </table>
         )}
       </div>
+      </Layout>
     </>
   );
 }
