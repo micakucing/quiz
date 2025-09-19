@@ -28,13 +28,16 @@ export default function Navbar() {
         <div>
           {user ? (
             <>
- 
+                           <Link href="/petunjuk" className="btn btn-sm btn-warning me-2">Pentunjuk</Link>
+
               <Link href="/dashboard" className="btn btn-sm btn-primary me-2">Dashboard</Link>
               <Link href="/leaderboard" className="btn btn-sm btn-info me-2">Leaderboard</Link>
               <button className="btn btn-sm btn-danger" onClick={() => handleLogout()}>Logout</button>
             </>
           ) : (
             <>
+                          <Link href="/petunjuk" className="btn btn-sm btn-warning me-2">Pentunjuk</Link>
+
               <Link href="/login" className="btn btn-sm btn-primary me-2">Login</Link>
               <Link href="/register" className="btn btn-sm btn-success">Register</Link>
             </>
